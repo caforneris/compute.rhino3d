@@ -175,6 +175,13 @@ namespace compute.geometry
                 }
             }
 
+            // A plug-in that creates a WinForms control during the solve installs a
+            // WindowsFormsSynchronizationContext on this request thread. Nothing pumps
+            // messages here, so the await below would never resume and the request would
+            // hang. Drop any such context before writing the response.
+            if (System.Threading.SynchronizationContext.Current != null)
+                System.Threading.SynchronizationContext.SetSynchronizationContext(null);
+
             if (!string.IsNullOrEmpty(json))
             {
                 ctx.Response.ContentType = "application/json";
